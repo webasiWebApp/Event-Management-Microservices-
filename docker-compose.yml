@@ -21,5 +21,20 @@ services:
       interval: 10s
       retries: 10
 
+  vendor-service:
+    build: ./services/vendor-service
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    ports: ["3001:3001"]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3001/health',{headers:{'x-user-id':'00000000-0000-4000-8000-000000000001','x-user-role':'CLIENT'}}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
   pgdata:
